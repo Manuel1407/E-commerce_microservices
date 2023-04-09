@@ -1,5 +1,6 @@
 package org.ikechukwu.orderservice.controller;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.ikechukwu.orderservice.dto.OrderRequest;
 import org.ikechukwu.orderservice.service.OrderService;
@@ -15,8 +16,13 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @CircuitBreaker(name = "Inventory", fallbackMethod = "fallbackMethod")
     public String placeOrder(@RequestBody OrderRequest orderRequest) {
         orderService.placeOrder(orderRequest);
         return "Order Placed Successfully";
+    }
+
+    public String fallbackMethod(OrderRequest orderRequest, RuntimeException runtimeException) {
+        return "Oops! something went wrong, please order after some time!";
     }
 }
